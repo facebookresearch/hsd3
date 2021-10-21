@@ -1,0 +1,704 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>HSD-3 - Hierarchical Skills for Efficient Exploration</title>
+
+  <!-- bib tags -->
+  <!--
+  <meta name="citation_title" content="Hierarchical Skills for Efficient Exploration"/>
+  <meta name="citation_author" content="Gehring, Jonas"/>
+  <meta name="citation_author" content="Synnaeve, Gabriel"/>
+  <meta name="citation_author" content="Krause, Andreas"/>
+  <meta name="citation_author" content="Usunier, Nicolas"/>
+  <meta name="citation_abstract" content="In reinforcement learning, pre-trained low-level skills have the potential to greatly facilitate exploration. However, prior knowledge of the downstream task is required to strike the right balance between generality (fine-grained control) and specificity (faster learning) in skill design. In previous work on continuous control, the sensitivity of methods to this trade-off has not been addressed explicitly, as locomotion provides a suitable prior for navigation tasks, which have been of foremost interest. In this work, we analyze this trade-off for low-level policy pre-training with a new benchmark suite of  diverse, sparse-reward tasks for bipedal robots. We alleviate the need for prior knowledge by proposing a hierarchical skill learning framework that acquires skills of varying complexity in an unsupervised manner. For utilization on downstream tasks, we present a three-layered hierarchical learning algorithm to automatically trade off between general and specific skills as required by the respective task. In our experiments, we show that our approach performs this trade-off effectively and achieves better results than current state-of-the-art methods for end-to-end hierarchical reinforcement learning and unsupervised skill discovery."/>
+  <meta name="citation_journal_title" content="Advances in Neural Information Processing Systems"/>
+  <meta name="citation_volume" content="34"/>
+  <meta name="citation_publication_date" content="2021"/>
+  <meta name="citation_pdf_url" content=""/>
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+  <style type="text/css">
+body {
+  background-color: white;
+  color: black;
+  text-align: center;
+}
+h1 {
+  margin-bottom: 0.1em;
+}
+h2 {
+  margin-top: 0.1em;
+  font-size: 1.1em;
+}
+p {
+	text-align: justify;
+}
+a {
+  text-decoration: none;
+}
+#main {
+  max-width: 1024px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.1em;
+}
+#authors {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+#authors td {
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+#authors .affiliation {
+  font-size: 0.8em;
+}
+#approach td {
+	text-align: justify;
+  vertical-align: top;
+  padding: 1em;
+}
+#videos {
+  width: 100%;
+  display: flex;
+  justify-content: left;
+}
+.htab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+.htab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0.5em;
+  transition: 0.3s;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.0em;
+}
+.htab button:hover {
+  background-color: #ddd;
+}
+.htab button.active {
+  background-color: #ccc;
+}
+.htablinks {
+  color: inherit;
+}
+.htabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+.htabcontent video {
+  width: 100%;
+  padding-top: 0.5em;
+}
+.htabcontent table {
+  width: 100%;
+}
+.htabcontent th {
+  text-align: center;
+}
+.htabcontent td {
+  text-align: left;
+}
+/* Style the tab */
+.vtab {
+  float: top;
+  background-color: #f1f1f1;
+}
+.vtabtd {
+  vertical-align: top;
+}
+.vtab button {
+  display: block;
+  background-color: inherit;
+  float: right;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0.5em;
+  transition: 0.3s;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.0em;
+  text-align: left;
+  width: 100%;
+}
+.vtab button:hover {
+  background-color: #ddd;
+}
+.vtab button.active {
+  background-color: #ccc;
+}
+.vtablinks {
+  color: inherit;
+}
+.vtabcontent {
+  float: left;
+  padding: 0px 12px;
+  padding-top: none;
+  border-left: none;
+  width: 100$;
+}
+#videos-downstream-Walker video {
+  width: 100%;
+  padding-top: 0px;
+}
+#videos-downstream-Walker img {
+  width: 100%;
+  padding-top: 0px;
+}
+#videos-downstream-Humanoid video {
+  width: 100%;
+  padding-top: 0px;
+}
+#videos-downstream-Humanoid img {
+  width: 100%;
+  padding-top: 0px;
+}
+.vtabcontent table {
+  width: 100%;
+}
+.vtabcontent th {
+  text-align: center;
+}
+.vtabcontent td {
+  text-align: center;
+}
+.htabcontent .left {
+  text-align: left;
+}
+.footer p {
+  text-align: right;
+  font-size: 0.8em;
+}
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 180px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -60px;
+}
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+  </style>
+</head>
+
+<body onload="init()">
+<div id="main">
+<h1>Hierarchical Skills for Efficient Exploration</h1>
+<!--<h2>NeurIPS 2021</h2>-->
+<div id="authors">
+<table>
+  <tr>
+  <td><a href="https://jgehring.net">Jonas Gehring</a></td>
+  <td><a href="https://ai.facebook.com/people/gabriel-synnaeve/">Gabriel Synnaeve</a></td>
+  <td><a href="https://las.inf.ethz.ch/krausea">Andreas Krause</a></td>
+  <td><a href="https://ai.facebook.com/people/nicolas-usunier/">Nicolas Usunier</a></td>
+  </tr>
+  <tr>
+  <td class="affiliation">FAIR, ETH Zürich</td>
+  <td class="affiliation">FAIR</td>
+  <td class="affiliation">ETH Zürich</td>
+  <td class="affiliation">FAIR</td>
+  </tr>
+</table>
+</div>
+
+<hr>
+<p>
+<b>TL;DR</b>&nbsp; Pre-training a hierarchy of skill policies and using them effectively on sparse-reward downstream tasks.
+</p>
+<p>
+<a href="https://arxiv.org">Paper</a> | 
+<!--<a href="">Talk</a> |-->
+<a href="#videos">Videos</a> |
+<a href="https://github.com/facebookresearch/hsd3">Code</a> |
+<a href="https://github.com/facebookresearch/hsd3#hierarchical-control">Pre-Trained Skill Policies</a> |
+<a href="https://github.com/facebookresearch/bipedal-skills">Benchmark
+  Environments</a>
+</p>
+<video autoplay muted loop playsinline poster="poster-teaser.webp">
+  <source src="https://drive.google.com/uc?export=download&id=1Dmd7wnhg_naSBAsFWLMyK9JY5yWeCHzr"/>
+</video>
+</table>
+
+<hr>
+<div id="abstract">
+<p>
+<b>Abstract</b>&nbsp;
+In reinforcement learning, pre-trained low-level skills have the potential to greatly facilitate exploration.
+However, prior knowledge of the downstream task is required to strike the right balance between generality (fine-grained control) and specificity (faster learning) in skill design.
+In previous work on continuous control, the sensitivity of methods to this trade-off has not been addressed explicitly, as locomotion provides a suitable prior for navigation tasks, which have been of foremost interest.
+In this work, we analyze this trade-off for low-level policy pre-training with a new benchmark suite of  diverse, sparse-reward tasks for bipedal robots.
+We alleviate the need for prior knowledge by proposing a hierarchical skill learning framework that acquires skills of varying complexity in an unsupervised manner.
+For utilization on downstream tasks, we present a three-layered hierarchical learning algorithm to automatically trade off between general and specific skills as required by the respective task.
+In our experiments, we show that our approach performs this trade-off effectively and achieves better results than current state-of-the-art methods for end-to-end hierarchical reinforcement learning and unsupervised skill discovery.
+</p>
+</div>
+
+<hr>
+<div id="approach">
+<p>
+<b>Approach</b> 
+<div>
+<img width="90%" src="hsd3-system.webp"/>
+</div>
+<table>
+  <tr>
+    <td>
+      Low-level policies are learned in an empty pre-training environment, with the objective to reach random configurations (goal <i>g</i>) of a sampled skill (goal space <i>G<sup>F</sup></i> defined over a feature set <i>F</i>).
+      Examples of goal space features are translation along the X-axis or the position of a limb.
+    </td>
+    <td>
+      Learning on downstream tasks with a three-level hierarchical policy to select a goal space, a goal and finally a native action <i>a<sub>t</sub></i> with the pre-trained low-level policy.
+      The low-level policy acts on proprioceptive states <i>s<sup>p</sup></i>, while high-level policies <i>&pi;<sup>f</sup></i> and <i>&pi;<sup>g</sup></i> leverage extra task-specific information via <i>s<sup>+</sup></i>.
+    </td>
+</table>
+</p>
+</div id="approach">
+
+<hr>
+<p>
+<a name="videos"/>
+<b>Videos</b>
+</p>
+
+<p>
+<b>Pre-Training</b>&nbsp;
+We pre-train a shared skill policy to achieve goals in a hierarchy of goal spaces that encompasses both single features (left) and their combinations (middle).
+In the empty pre-training environment, goal spaces and goals are sampled randomly (right).
+</p>
+<div id="videos-pretrain">
+  <div class="htab">
+    <button class="htablinks" onclick="selectRobot(event, 'Walker')">Walker</button>
+    <button class="htablinks" onclick="selectRobot(event, 'Humanoid')">Humanoid</button>
+  </div>
+  <div id="videos-pretrain-Walker" class="htabcontent">
+    <video controls playsinline preload="none" poster="poster-walker-pretrain-w.webp">
+      <source src="https://drive.google.com/uc?export=download&id=11uJdaKTsRBm0uZEfcRkA8mSEGh3jkaVK"/>
+    </video>
+  </div>
+  <div id="videos-pretrain-Humanoid" class="htabcontent">
+    <video controls playsinline preload="none" poster="poster-humanoid-pretrain.webp">
+      <source src="https://drive.google.com/uc?export=download&id=1IunRkpGtZz63V0riZyvgyLrpuvRTFfYn"/>
+    </video>
+  </div>
+</div>
+
+<p>
+<b>Downstream Tasks</b>&nbsp;
+We use the same pre-trained policy for all downstream tasks, and train
+individual high-level policies on top of it.
+Below, we should videos of the best training runs for both HSD-3 and selected baselines.
+For SAC in particular, only very few (if any) out of 9 seeds make meaningful progress on tasks with a sparse reward.
+Click the chart icon on the right to gauge learning speed and robustness across seeds.
+
+<div id="videos-downstream">
+  <div class="htab">
+    <button class="htablinks" onclick="selectRobot(event, 'Walker')">Walker</button>
+    <button class="htablinks" onclick="selectRobot(event, 'Humanoid')">Humanoid</button>
+  </div>
+  <div id="videos-downstream-Walker" class="htabcontent">
+    <table>
+      <tr>
+        <th width="15%" class="left">Environment</th>
+        <th width="20%">
+          <div class="tooltip">HSD-3
+            <span class="tooltiptext">Our proposed algorithm</span>
+          </div>
+        </th>
+        <th width="20%">
+          <div class="tooltip">SAC
+            <span class="tooltiptext">Soft Actor-Critic</span>
+          </div>
+        </th>
+        <th width="20%">
+          <div class="tooltip">DIAYN-C
+            <span class="tooltiptext">Skills acquired with a variant of
+              "Diversity is all you need"</span>
+          </div>
+        </th>
+        <th width="20%">
+          <div class="tooltip">SD
+            <span class="tooltiptext">Our pre-trained skill policy, using
+              the full goal space</span>
+          </div>
+        </th>
+        <th width="5%"></th>
+      </tr>
+      <tr>
+        <td class="left">Stairs</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="walker-stairs-video">
+            <video controls playsinline preload="none" poster="poster-walker-stairs.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1ZohTZ1aEnNCbgd7sQbOuhnnVbOHVNQc0"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="walker-stairs-chart">
+            <img src="walker-stairs-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="walker-stairs">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learing curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="left">Gaps</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="walker-gaps-video">
+            <video controls playsinline preload="none" poster="poster-walker-gaps.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1D_OYNnj7plpkhIpKAwLhJ7WZQRo-84hm"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="walker-gaps-chart">
+            <img src="walker-gaps-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="walker-gaps">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="left">GoalWall</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="walker-goalwall-video">
+            <video controls playsinline preload="none" poster="poster-walker-goalwall.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1N1Fw0bc_kmEXp_vrRfsqvp9Q6l1yXXZS"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="walker-goalwall-chart">
+            <img src="walker-goalwall-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="walker-goalwall">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="left">Hurdles</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="walker-hurdles-video">
+            <video controls playsinline preload="none" poster="poster-walker-hurdles.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1bUH9lnOIuWQ6hxv5a4h8BQmF3ZAs-L9a"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="walker-hurdles-chart">
+            <img src="walker-hurdles-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="walker-hurdles">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="left">Limbo</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="walker-limbo-video">
+            <video controls playsinline preload="none" poster="poster-walker-limbo.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1BT9erV511Xk2aSCGpT7xmVCXuLZTSJHS"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="walker-limbo-chart">
+            <img src="walker-limbo-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="walker-limbo">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="left">HurdlesLimbo</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="walker-hurdleslimbo-video">
+            <video controls playsinline preload="none" poster="poster-walker-hurdleslimbo.webp">
+              <source src="https://drive.google.com/uc?export=download&id=199r_c8C3_ii0t-4nHZgvwb43NuCLdnvj"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="walker-hurdleslimbo-chart">
+            <img src="walker-hurdleslimbo-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="walker-hurdleslimbo">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="left">PoleBalance</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="walker-pbalance-video">
+            <video controls playsinline preload="none" poster="poster-walker-pbalance.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1pvZeYyqQ96zf0gFULhShEIk0wLZtcWJm"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="walker-pbalance-chart">
+            <img src="walker-pbalance-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="walker-pbalance">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div id="videos-downstream-Humanoid" class="htabcontent">
+    <table>
+      <tr>
+        <th width="15%" class="left">Environment</th>
+        <th width="20%">
+          <div class="tooltip">HSD-3
+            <span class="tooltiptext">Our proposed algorithm</span>
+          </div>
+        </th>
+        <th width="20%">
+          <div class="tooltip">SAC
+            <span class="tooltiptext">Soft Actor-Critic</span>
+          </div>
+        </th>
+        <th width="20%">
+          <div class="tooltip">SD
+            <span class="tooltiptext">Our pre-trained skill policy, using
+              the full goal space</span>
+          </div>
+        </th>
+        <th width="20%">
+          <div class="tooltip">SD*
+            <span class="tooltiptext">Our pre-trained skill policy, using the best single goal space</span>
+          </div>
+        </th>
+        <th width="5%"></th>
+      </tr>
+      <tr>
+        <td class="left">Stairs</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="humanoid-stairs-video">
+            <video controls playsinline preload="none" poster="poster-humanoid-stairs.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1PiGqDd8WyKgtMLAP__vXd5jjMBAQH-jJ"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="humanoid-stairs-chart">
+            <img src="humanoid-stairs-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="humanoid-stairs">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="left">Hurdles</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="humanoid-hurdles-video">
+            <video controls playsinline preload="none" poster="poster-humanoid-hurdles.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1HOyHDH1gn6u5dSxoXT882LIq-p2dyQcx"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="humanoid-hurdles-chart">
+            <img src="humanoid-hurdles-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="humanoid-hurdles">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="left">Limbo</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="humanoid-limbo-video">
+            <video controls playsinline preload="none" poster="poster-humanoid-limbo.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1kStPJ9qwaplIMTPzZdYx4alrxPzkPErS"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="humanoid-limbo-chart">
+            <img src="humanoid-limbo-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="humanoid-limbo">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="left">HurdlesLimbo</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="humanoid-hurdleslimbo-video">
+            <video controls playsinline preload="none" poster="poster-humanoid-hurdleslimbo.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1glv6W2DNKuisTPuT0CkzWKTDgoSOwA87"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="humanoid-hurdleslimbo-chart">
+            <img src="humanoid-hurdleslimbo-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="humanoid-hurdleslimbo">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="left">PoleBalance</td>
+        <td colspan="4">
+          <div class="vtabcontent" id="humanoid-pbalance-video">
+            <video controls playsinline preload="none" poster="poster-humanoid-pbalance.webp">
+              <source src="https://drive.google.com/uc?export=download&id=1FBwScWFgMFSERj3EvSxaTe1WKP6GTPkH"/>
+            </video>
+          </div>
+          <div class="vtabcontent" id="humanoid-pbalance-chart">
+            <img src="humanoid-pbalance-s.webp"/>
+          </div>
+        </td>
+        <td class="vtabtd">
+          <div class="vtab" id="humanoid-pbalance">
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'video')" title="Videos"><i class="fas fa-film"></i></button>
+            <button class="vtablinks" onclick="switchTaskDisplay(event, 'chart')" title="Learning curves"><i class="fas fa-chart-line"></i></button>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+</p>
+
+<hr>
+<div class="footer">
+</div>
+</div>
+
+<script>
+function selectRobot(evt, robot) {
+  var src = evt.currentTarget;
+  var container = src.parentElement.parentElement;
+  var i, tabcontent, tablinks;
+  tabcontent = container.getElementsByClassName("htabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = container.getElementsByClassName("htablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(container.id + "-" + robot).style.display = "block";
+  src.className += " active";
+}
+
+function selectBaseline(evt, baseline) {
+  var src = evt.currentTarget;
+  var container = src.parentElement.parentElement;
+  var i, tabcontent, tablinks;
+  tabcontent = container.getElementsByClassName("vtabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = container.getElementsByClassName("vtablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(container.id + "-" + baseline).style.display = "block";
+  src.className += " active";
+}
+
+function switchTaskDisplay(evt, display) {
+  var src = evt.currentTarget;
+  var parent = src.parentElement;
+  var container = src.parentElement.parentElement.parentElement;
+  console.log(container);
+  var i, tabcontent, tablinks;
+  tabcontent = container.getElementsByClassName("vtabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = container.getElementsByClassName("vtablinks");
+  console.log(tablinks);
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(parent.id + "-" + display).style.display = "block";
+  src.className += " active";
+}
+
+function init() {
+  selectRobot({currentTarget: document.querySelector("#videos-pretrain button")}, "Walker");
+  selectRobot({currentTarget: document.querySelector("#videos-downstream button")}, "Walker");
+  switchTaskDisplay({currentTarget: document.querySelector("#walker-hurdles button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#walker-limbo button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#walker-hurdleslimbo button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#walker-stairs button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#walker-goalwall button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#walker-gaps button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#walker-pbalance button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#humanoid-hurdles button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#humanoid-limbo button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#humanoid-hurdleslimbo button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#humanoid-stairs button")}, "video");
+  switchTaskDisplay({currentTarget: document.querySelector("#humanoid-pbalance button")}, "video");
+}
+</script>
+
+</body>
+</html>
