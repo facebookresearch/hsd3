@@ -9,7 +9,7 @@ Exploration](https://arxiv.org/abs/2110.10809). It contains
 Additionally, we provide pre-trained skill policies for the Walker and Humanoid
 robots considered in the paper.
 
-The benchmark suite can be found in a standlone repository at
+The benchmark suite can be found in a standalone repository at
 [facebookresearch/bipedal-skills](https://github.com/facebookresearch/bipedal-skills)
 
 ## Prerequisites
