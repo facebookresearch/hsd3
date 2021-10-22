@@ -1,0 +1,37 @@
+defaults:
+  - common
+  - agent: sac
+
+max_steps: 1e7
+robot: Walker
+eval:
+  interval: 50000
+  metrics:
+    score: sum:default
+
+env:
+  name: BiskHurdles-v1
+  train_procs: 1
+  eval_procs: 50
+  args:
+    robot: ${robot}
+  wrappers:
+    - flatten_obs
+
+agent:
+  trace: true
+
+video: null # not during trainng
+visdom:
+  offline: true
+
+model:
+  pi: pi_d2rl_256
+  q: qd_d2rl_256
+
+optim:
+  pi:
+    _target_: torch.optim.Adam
+    lr: 3e-4
+    fuse: true
+  q: ${optim.pi}

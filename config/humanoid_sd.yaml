@@ -1,0 +1,71 @@
+defaults:
+  - common
+  - agent: hsdb
+
+max_steps: 1e8
+robot: HumanoidPC
+goal_space: bodyfeet
+#subsets: 0-1-2-3+4-5+6
+subsets: 0+3-2+3-3+4-3+6+7+8-3+9+10+11
+action_interval: 5
+eps: 1.0
+auto_adapt: true
+
+eval:
+  interval: 200000
+  metrics:
+    score: sum:default
+
+video: null
+visdom:
+  offline: true
+
+env:
+  name: BiskHurdles-v1
+  train_procs: 5
+  eval_procs: 50
+  args:
+    robot: ${robot}
+  wrappers:
+    - time
+    - bisk_features: ${agent.goal_space.key}:${goal_space}
+
+agent:
+  trace: true
+  action_interval: ${action_interval}
+  bandit_d: ${bandit_task}
+  batch_size: 512
+  rpbuf_size: 2000000
+  randexp_samples: 10000
+  warmup_samples: 10000
+  samples_per_update: 500
+  num_updates: 50
+  goal_space:
+    robot: ${robot}
+    features: ${goal_space}
+    key: _goal_space
+    subsets: ${subsets}
+    from_lo_eps: ${eps}
+  lo:
+    init_from: checkpoint-lo.pt
+
+bandit_task:
+  _target_: hucc.models.bandits.UniformBandit
+
+model:
+  hi:
+    pi_subgoal: pi_d2rl_mt_d_256
+    q: qd_d2rl_d_256
+  lo:
+    pi: pi_d2rl_d_1024
+
+optim:
+  hi:
+    pi_subgoal:
+      _target_: torch.optim.Adam
+      lr: 1e-4
+      fuse: true
+    q:
+      _target_: torch.optim.Adam
+      lr: 1e-4
+      fuse: true

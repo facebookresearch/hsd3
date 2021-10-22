@@ -1,0 +1,14 @@
+*~
+.*
+.*.swp
+__pycache__
+dist/
+*.egg-info/
+MANIFEST
+.hydra/
+runs/
+*.log
+*.pt
+*.json
+.dumbo.json
+outputs/

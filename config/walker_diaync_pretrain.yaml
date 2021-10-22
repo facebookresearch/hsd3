@@ -1,0 +1,81 @@
+defaults:
+  - common
+  - agent: diayn
+
+n_skills: 10
+n_embed: ${n_features}
+max_steps: 1e7
+horizon: 72
+idle_steps: 0
+robot: Walker
+features: bodyfeet
+feature_dims: 0#1#2#3#4#5#6
+n_features: 7  # Needs to correspond to len(split(feature_dims, '#'))
+checkpoint_path: checkpoint-diaync.pt
+
+# Evals are not very useful as they always start around the fixed initial state.
+# We'd ideally have multiple episodes from each env, but hey.
+eval:
+  interval: 100000
+  video:
+    record_all: true
+video: null
+visdom:
+  offline: true
+
+env:
+  name: ContCtrlgsPreTraining-v1
+  eval_procs: ${n_skills}  # we want to see them all
+  train_procs: 10
+  args:
+    robot: ${robot}
+    features: ${features}
+    feature_dist: {"0": 1.0}  # just to make the env happy
+    task_map: {"0": 0}  # just to make the env happy
+    idle_steps: ${idle_steps}
+    max_steps: ${horizon}
+    full_episodes: true
+    hard_reset_interval: 100
+    implicit_soft_resets: false
+    normalize_gs_observation: true
+  wrappers:
+    - time
+
+agent:
+  n_skills: ${n_skills}
+  samples_per_update: 500
+  rpbuf_size: 3e6
+  num_updates: 50
+  batch_size: 256
+  randexp_samples: 10000
+  warmup_samples: 10000
+  alpha: 0.1
+  optim_alpha:
+    _target_: torch.optim.Adam
+    lr: 1e-4
+
+  phi_obs: gs_observation
+  phi_obs_feats: ${feature_dims}
+
+model:
+  # Policy that allows for interpolation between skills after training.
+  # This way, we'll get a nice continuous action space.
+  pi:
+    name: pi_diayn_cskill
+    base: pi_d2rl_256
+    n_skills: ${n_skills}
+    n_embed: ${n_embed}
+    activation: tanh
+  q: qd_d2rl_256
+  phi:
+    name: phi_diayn_d2rl_256
+    n_skills: ${n_skills}
+    obs_dim: ${n_features}
+
+optim:
+  pi:
+    _target_: torch.optim.Adam
+    lr: 3e-4
+    fuse: true
+  q: ${optim.pi}
+  phi: ${optim.q}

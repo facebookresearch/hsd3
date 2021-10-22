@@ -1,0 +1,65 @@
+defaults:
+  - common
+  - agent: hsd3
+
+max_steps: 1e7
+robot: Walker
+goal_space: bodyfeet
+subsets: from_lo
+action_interval: 5
+eps: 1.0
+auto_adapt: true
+
+eval:
+  interval: 50000
+  metrics:
+    score: sum:default
+
+video: null
+visdom:
+  offline: true
+
+env:
+  name: BiskHurdles-v1
+  train_procs: 1
+  eval_procs: 50
+  args:
+    robot: ${robot}
+  wrappers:
+    - time
+    - bisk_features: ${agent.goal_space.key}:${goal_space}
+
+agent:
+  trace: true
+  action_interval: ${action_interval}
+  goal_space:
+    robot: ${robot}
+    features: ${goal_space}
+    key: _goal_space
+    subsets: ${subsets}
+    from_lo_eps: ${eps}
+  lo:
+    init_from: checkpoint-lo.pt
+
+model:
+  hi:
+    pi_task: pi_d2rl_discrete_d_256
+    pi_subgoal: pi_d2rl_mt_d_256
+    q: qd_d2rl_flattsg_d_256
+  lo:
+    pi: pi_d2rl_d_1024
+
+optim:
+  hi:
+    pi_task:
+      _target_: torch.optim.Adam
+      lr: 3e-4
+      fuse: true
+    pi_subgoal:
+      _target_: torch.optim.Adam
+      lr: 3e-4
+      fuse: true
+    q:
+      _target_: torch.optim.Adam
+      lr: 1e-4
+      fuse: true

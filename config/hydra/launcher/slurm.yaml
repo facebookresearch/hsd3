@@ -1,0 +1,10 @@
+defaults:
+  - submitit_slurm
+
+partition: ${slurm.partition}
+cpus_per_task: ${slurm.cpus_per_task}
+gpus_per_task: ${slurm.gpus_per_task}
+mem_gb: ${slurm.mem_gb}
+timeout_min: ${slurm.time_min}
+comment: ${slurm.comment}
+max_num_timeout: ${slurm.max_restart}

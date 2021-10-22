@@ -1,0 +1,41 @@
+# Defaults for HIRO agent, with tuned parameters from D2RL: Deep Dense
+# Architectures in Reinforcement Learning
+
+name: 'hiro'
+gamma: 0.99  # discount factor
+polyak: 0.995  # polyak step size for updating target network
+batch_size: 256
+rpbuf_size: 1e6  # replay buffer size
+samples_per_update: 50  # perform updates every N samples
+num_updates: ${agent.samples_per_update}
+warmup_samples: 1000  # use first N hi samples to fill replay buffer
+randexp_samples: 1000  # explore with random actions for first N hi samples
+clip_grad_norm: 0.0 # only used if > 0
+dense_hi_updates: false  # DynE-style dense updates for hi policy
+
+alpha_hi: 0.1
+target_entropy_factor_hi: 1.0
+optim_alpha_hi:
+  _target_: torch.optim.Adam
+  lr: 1e-4
+
+alpha_lo: 0.1
+target_entropy_factor_lo: 1.0
+optim_alpha_lo:
+  _target_: torch.optim.Adam
+  lr: 1e-4
+
+relabel_goals: true
+action_interval_hi: 10
+normalize_reward_lo: false  # normalize reward by ranges
+reward_lo: distance
+ctrl_cost_lo: 0.001
+fallover_penalty_lo: -1.0
+hide_from_lo: observation:0-1 # features that low-level won't see
+lo_obs: null # i.e. pass full observation to low-level policy
+goal_space:
+  key: observation
+  features: 0#1
+  range_min: -10#-10
+  range_max: 10#10
+  feature_subset: null # for easy sweeping

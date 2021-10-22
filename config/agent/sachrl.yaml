@@ -1,0 +1,25 @@
+# Defaults for SACHRL agent, with tuned parameters from D2RL: Deep Dense
+# Architectures in Reinforcement Learning
+
+name: 'sachrl'
+gamma: 0.99  # discount factor
+polyak: 0.995  # polyak step size for updating target network
+batch_size: 256
+rpbuf_size: 1e6  # replay buffer size
+rpbuf_device: auto
+samples_per_update: 50  # perform updates every N samples
+num_updates: ${agent.samples_per_update}
+warmup_samples: 1000
+randexp_samples: 1000
+clip_grad_norm: 0.0 # only used if > 0
+
+alpha: 0.1
+target_entropy_factor: 1.0
+optim_alpha:
+  _target_: torch.optim.Adam
+  lr: 1e-4
+
+action_interval: ???
+n_actions_hi: ???
+init_lo_from: ???
+hide_from_lo: null # hide these features from the observation

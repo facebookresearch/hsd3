@@ -1,0 +1,85 @@
+defaults:
+  - common
+  - agent: sacmt
+
+horizon: 72
+idle_steps: 0
+robot: HumanoidPC
+features: bodyfeet
+feature_dims: 0+3#2+3#3+4#3+6+7+8#3+9+10+11
+feature_rank: 1
+feature_rank_max: 99
+ctrl_eps: 1.0
+precision: 0.1
+max_new_tasks: 1000
+task_weighting: uniform
+downrank: 0.1
+lp_new_task: 0.1
+lp_eps: 0.1
+eval_mode: reachability
+max_steps: 2.5e8
+combine_after_steps: 0
+backprop_fallover: false
+estimate_joint_spaces: null
+init_model_from:
+checkpoint_path: checkpoint-lo.pt
+
+eval:
+  episodes_per_task: 50
+  interval: 250000
+  video:
+    record_all: false
+video:
+  interval: 500000
+
+distributed:
+  num_actors: 1
+  num_learners: 1
+  rdvu_path: /tmp
+
+slurm:
+  num_gpus: 2
+  cpus_per_task: ${env.train_procs}
+
+visdom:
+  offline: true
+
+env:
+  name: ContCtrlgsPreTraining-v1
+  eval_procs: 20
+  train_procs: 20
+  args:
+    robot: ${robot}
+    features: ${features}
+    idle_steps: ${idle_steps}
+    max_steps: ${horizon}
+    precision: ${precision}
+    resample_features: soft
+    goal_sampling: uniform
+    hard_reset_interval: 100
+    implicit_soft_resets: true
+    ctrl_cost: 0
+
+agent:
+  gamma: auto_horizon
+  samples_per_update: 5000
+  rpbuf_size: 3e6
+  num_updates: 50
+  batch_size: 1024
+  randexp_samples: 10000
+  warmup_samples: 10000
+  flatten_obs: false
+  per_task_alpha: false
+
+model:
+  pi: pi_d2rl_d_1024
+  q: qd_d2rl_d_1024
+  reachability: q_d2rl_d_1024
+
+optim:
+  pi:
+    _target_: torch.optim.Adam
+    lr: 1e-4
+    fuse: true
+  q: ${optim.pi}
+  reachability: ${optim.q}

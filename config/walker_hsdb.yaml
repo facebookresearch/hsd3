@@ -1,0 +1,71 @@
+defaults:
+  - common
+  - agent: hsdb
+
+max_steps: 1e7
+robot: Walker
+goal_space: bodyfeet
+subsets: from_lo
+action_interval: 5
+eps: 1.0
+
+eval:
+  interval: 50000
+  metrics:
+    score: sum:default
+
+slurm:
+  cpus_per_task: 10
+
+video: null
+visdom:
+  offline: true
+
+env:
+  name: BiskHurdles-v1
+  train_procs: 10
+  eval_procs: 50
+  args:
+    robot: ${robot}
+  wrappers:
+    - time
+    - bisk_features: ${agent.goal_space.key}:${goal_space}
+
+agent:
+  trace: true
+  action_interval: ${action_interval}
+  randexp_samples: 31000 # Approx ensure we've got episodes from each subset
+  warmup_samples: 31000
+  bandit_d: ${bandit_task}
+  goal_space:
+    robot: ${robot}
+    features: ${goal_space}
+    key: _goal_space
+    subsets: ${subsets}
+    from_lo_eps: ${eps}
+  lo:
+    init_from: checkpoint-lo.pt
+
+bandit_task:
+  _target_: hucc.models.bandits.Agent57Bandit
+  beta: auto
+  window: 500
+  eps: 0.5
+
+model:
+  hi:
+    pi_subgoal: pi_d2rl_mt_d_256
+    q: qd_d2rl_d_256
+  lo:
+    pi: pi_d2rl_d_1024
+
+optim:
+  hi:
+    pi_subgoal:
+      _target_: torch.optim.Adam
+      lr: 3e-4
+      fuse: true
+    q:
+      _target_: torch.optim.Adam
+      lr: 3e-4
+      fuse: true

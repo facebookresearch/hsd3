@@ -1,0 +1,23 @@
+# Switching Ensemble from "Why Does Hierarchy (Sometimes) Work So Well in
+# Reinforcement Learning?", Nachum et al., 2019
+
+name: 'sacse'
+gamma: 0.99  # discount factor
+polyak: 0.995  # polyak step size for updating target network
+batch_size: 256
+rpbuf_size: 1e6  # replay buffer size
+samples_per_update: 50  # perform updates every N samples
+num_updates: ${agent.samples_per_update}
+warmup_samples: 1000  # use first N samples to fill replay buffer
+randexp_samples: 1000  # explore with random actions for first N samples
+clip_grad_norm: 0.0 # only used if > 0
+n_models: ???
+c_switch: 5
+
+alpha: 0.1  # If optim_alpha is not null, this is just the initial alpha value
+target_entropy_factor: 1.0 # If optim_alpha is not null
+optim_alpha:  # Can be set to null to disable entropy coefficient learning and use target_entropy instead.
+  _target_: torch.optim.Adam
+  lr: 1e-4
+
+trace: false # jit-trace Q-functions for training; may break fancy models

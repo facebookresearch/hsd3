@@ -1,0 +1,61 @@
+defaults:
+  - common
+  - agent: hiro
+
+max_steps: 1e7
+robot: Walker
+goal_space: bodyfeet
+action_interval: 5
+auto_adapt: true
+
+eval:
+  interval: 50000
+  metrics:
+    score: sum:default
+
+env:
+  name: BiskHurdles-v1
+  eval_procs: 50
+  args:
+    robot: ${robot}
+  wrappers:
+    - time
+    - bisk_features: ${agent.goal_space.key}:${goal_space}
+
+video: null
+visdom:
+  offline: true
+
+agent:
+  action_interval_hi: ${action_interval}
+  dense_hi_updates: false
+  reward_lo: potential
+  ctrl_cost_lo: 0
+  fallover_penalty_lo: -1
+  normalize_reward_lo: true
+  hide_from_lo: observation:1
+  goal_space:
+    key: _goal_space
+    features: 0#1#2#3#4#5#6
+    feature_subset: 0#1#2#3#4#5#6
+    range_min: 0.95#-3.00#-1.30#-0.72#-1.30#-0.72#-1.30
+    range_max: 1.50#3.00#1.30#0.99#0.00#0.99#0.00
+
+model:
+  hi:
+    pi: pi_d2rl_d_256
+    q: qd_d2rl_d_256
+  lo:
+    pi: ${model.hi.pi}
+    q: ${model.hi.q}
+
+optim:
+  hi:
+    pi:
+      _target_: torch.optim.Adam
+      lr: 3e-4
+      fuse: true
+    q: ${optim.hi.pi}
+  lo:
+    pi: ${optim.hi.pi}
+    q: ${optim.lo.pi}

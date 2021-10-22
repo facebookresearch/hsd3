@@ -1,0 +1,21 @@
+# Basic training loop setup for standard MuJoCo benchmarks (Ant-v2,
+# HalfCheetah-v2, ...)
+env:
+  name: 'HalfCheetah-v2'
+  train_procs: 1
+  eval_procs: 10
+
+max_steps: 1e6
+
+eval:
+  interval: 10000
+  video:
+    record_all: false
+    length: 500
+    size: [480, 480]
+
+# Record training videos
+video:
+  interval: ${eval.interval}
+  length: 500
+  size: [480, 480]

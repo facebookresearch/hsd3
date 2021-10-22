@@ -1,0 +1,47 @@
+defaults:
+  - common
+  - agent: sachrl
+
+max_steps: 1e7
+robot: Walker
+action_interval: 5
+auto_adapt: true
+
+eval:
+  interval: 50000
+  metrics:
+    score: sum:default
+
+video: null
+visdom:
+  offline: true
+
+env:
+  name: BiskHurdles-v1
+  train_procs: 1
+  eval_procs: 50
+  args:
+    robot: ${robot}
+  wrappers:
+    - time
+
+agent:
+  action_interval: ${action_interval}
+  n_actions_hi: 7
+  init_lo_from: checkpoint-diaync-policy.pt
+  hide_from_lo: 1 # x-position
+
+model:
+  hi:
+    pi: pi_d2rl_d_256
+    q: qd_d2rl_d_256
+  lo:
+    pi: pi_d2rl_d_256
+
+optim:
+  hi:
+    pi:
+      _target_: torch.optim.Adam
+      lr: 3e-4
+      fuse: true
+    q: ${optim.hi.pi}

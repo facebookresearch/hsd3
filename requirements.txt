@@ -1,0 +1,9 @@
+bipedal-skills==1.0
+gym>=0.18
+hydra-core>=1.1
+imageio-ffmpeg>=0.4.4
+imageio>=2.9
+matplotlib>=3.4
+scipy>=1.6
+tensorboard>=1.15
+visdom>=0.1.8

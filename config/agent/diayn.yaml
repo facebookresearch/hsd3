@@ -1,0 +1,19 @@
+# Defaults for DIAYN agent
+
+name: 'diayn'
+gamma: 0.99  # discount factor
+polyak: 0.99  # polyak step size for updating target network
+batch_size: 128
+rpbuf_size: 1e6  # replay buffer size
+samples_per_update: 1  # perform updates every N samples
+num_updates: ${agent.samples_per_update}
+warmup_samples: 1000  # use first N samples to fill replay buffer
+n_skills: 10
+add_p_z: true  # add p(z) to pseudo-reward
+
+alpha: 0.1
+optim_alpha: null
+
+phi_obs: observation
+phi_obs_n: -1  # for using the first N features
+phi_obs_feats: null  # for using a set of features
