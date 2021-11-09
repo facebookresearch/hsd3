@@ -16,6 +16,7 @@ from itertools import combinations
 from pathlib import Path
 from typing import Dict, Optional, cast
 
+import gym
 import hydra
 import torch as th
 import torch.distributed as dist
