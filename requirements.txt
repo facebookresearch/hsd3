@@ -1,5 +1,5 @@
 bipedal-skills==1.0
-gym>=0.18
+gym>=0.18,<0.22
 hydra-core>=1.1
 imageio-ffmpeg>=0.4.4
 imageio>=2.9
